@@ -218,4 +218,4 @@ When adding features, the guiding constraint is: **does this help someone unders
 
 ## License
 
-MIT
+AGPL v3 - see [LICENSE](LICENSE) for details.
