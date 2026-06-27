@@ -2,7 +2,7 @@
 
 A local-first interactive PostgreSQL schema explorer. Connect to any Postgres database and get an instant force-directed graph of your tables, foreign-key relationships, smart insights, and path exploration — all running entirely on your machine.
 
-<img width="800" height="433" alt="image" src="https://github.com/user-attachments/assets/d99468d9-ab6b-4e36-809e-a05f146c740d" />
+<img width="800" height="433" alt="image" src="https://github.com/user-attachments/assets/36317097-6b31-4210-bdef-596d427ce224" />
 
 
 ## What it does
