@@ -2,7 +2,8 @@
 
 A local-first interactive PostgreSQL schema explorer. Connect to any Postgres database and get an instant force-directed graph of your tables, foreign-key relationships, smart insights, and path exploration — all running entirely on your machine.
 
-![SchemaLens screenshot](docs/screenshot.png)
+<img width="800" height="433" alt="image" src="https://github.com/user-attachments/assets/d99468d9-ab6b-4e36-809e-a05f146c740d" />
+
 
 ## What it does
 
