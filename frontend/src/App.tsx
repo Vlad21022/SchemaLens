@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Table2 } from 'lucide-react';
 import ConnectionForm from './components/ConnectionForm';
 import GraphCanvas from './components/GraphCanvas';
 import InsightPanel from './components/InsightPanel';
@@ -124,6 +125,8 @@ export default function App() {
     return new Set<string>();
   }, [insightHighlightIds]);
 
+  const isEmptyGraph = appState === 'connected' && (graph?.nodes.length ?? 0) === 0;
+
   return (
     <div className="relative w-full h-full overflow-hidden bg-[#070711]">
       {/* Ambient glow */}
@@ -139,7 +142,7 @@ export default function App() {
 
       {/* Graph canvas — full viewport */}
       <AnimatePresence>
-        {appState === 'connected' && graph && (
+        {appState === 'connected' && graph && !isEmptyGraph && (
           <motion.div
             key="graph"
             initial={{ opacity: 0 }}
@@ -159,6 +162,46 @@ export default function App() {
               onNodeClick={handleNodeClick}
               onNodeHover={setHoveredNode}
             />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Empty graph state */}
+      <AnimatePresence>
+        {isEmptyGraph && (
+          <motion.div
+            key="empty-state"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="absolute inset-0 flex items-center justify-center px-4"
+            style={{ zIndex: 10 }}
+          >
+            <div className="glass rounded-2xl max-w-xl w-full p-8 text-center shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+              <div className="mx-auto mb-5 w-14 h-14 rounded-2xl flex items-center justify-center bg-white/[0.04] border border-white/10">
+                <Table2 size={24} className="text-purple-300" />
+              </div>
+              <h2 className="text-xl font-semibold text-white mb-2">No tables found</h2>
+              <p className="text-sm leading-6 text-white/50 mb-6">
+                This database has no user-defined tables. System schemas{' '}
+                <code className="font-mono text-white/65 bg-white/[0.06] px-1.5 py-0.5 rounded">pg_catalog</code>{' '}
+                and{' '}
+                <code className="font-mono text-white/65 bg-white/[0.06] px-1.5 py-0.5 rounded">information_schema</code>{' '}
+                are always excluded.
+              </p>
+              <div className="grid gap-3 text-left sm:grid-cols-3">
+                {[
+                  'Try another schema or database',
+                  'Check that your user has table permissions',
+                  'Create user-defined tables and reconnect',
+                ].map(item => (
+                  <div key={item} className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 text-[12px] leading-5 text-white/45">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
