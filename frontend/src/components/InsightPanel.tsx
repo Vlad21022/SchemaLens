@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   AlertTriangle, Layers, Link2Off, Radar, HardDrive,
   Info, Network, ChevronLeft, ChevronRight, Sparkles,
+  Copy, Check,
 } from 'lucide-react';
 import type { Insight } from '../lib/types';
 
@@ -39,11 +40,17 @@ function renderBody(text: string) {
   );
 }
 
+function getInsightCopyText(insight: Insight) {
+  return `${insight.title}\n${insight.body.replace(/`([^`]+)`/g, '$1')}`;
+}
+
 export default function InsightPanel({ insights, onFocusNode, onInsightHover }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   // Reveal insights sequentially to simulate "thinking"
   const [visibleCount, setVisibleCount] = useState(0);
+  const [copiedInsightId, setCopiedInsightId] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     timerRef.current.forEach(clearTimeout);
@@ -58,7 +65,24 @@ export default function InsightPanel({ insights, onFocusNode, onInsightHover }: 
     return () => timerRef.current.forEach(clearTimeout);
   }, [insights]);
 
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    };
+  }, []);
+
   const visibleInsights = insights.slice(0, visibleCount);
+
+  const handleCopyInsight = async (event: React.MouseEvent<HTMLButtonElement>, insight: Insight) => {
+    event.stopPropagation();
+    await navigator.clipboard.writeText(getInsightCopyText(insight));
+    setCopiedInsightId(insight.id);
+
+    if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    copiedTimerRef.current = setTimeout(() => {
+      setCopiedInsightId(currentId => currentId === insight.id ? null : currentId);
+    }, 1500);
+  };
 
   return (
     <motion.div
@@ -136,6 +160,37 @@ export default function InsightPanel({ insights, onFocusNode, onInsightHover }: 
                         >
                           {cfg.label}
                         </span>
+                        <button
+                          type="button"
+                          onClick={event => handleCopyInsight(event, insight)}
+                          className="ml-auto -mr-1 -mt-1 w-6 h-6 rounded-md flex items-center justify-center text-white/35 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-white/80 hover:bg-white/10 transition-all"
+                          aria-label={`Copy ${insight.title} insight`}
+                          title="Copy insight"
+                        >
+                          <AnimatePresence mode="wait" initial={false}>
+                            {copiedInsightId === insight.id ? (
+                              <motion.span
+                                key="copied"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                transition={{ duration: 0.12 }}
+                              >
+                                <Check size={12} className="text-emerald-300" />
+                              </motion.span>
+                            ) : (
+                              <motion.span
+                                key="copy"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                transition={{ duration: 0.12 }}
+                              >
+                                <Copy size={12} />
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
+                        </button>
                       </div>
                       <p className="text-[12px] font-semibold text-white/90 leading-tight mb-1">
                         {insight.title}
